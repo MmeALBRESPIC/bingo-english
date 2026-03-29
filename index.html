@@ -204,7 +204,7 @@
           <label>
             Taille :
             <select id="gridSize">
-              <option value="3" selected>3 x 3</option>
+              <option value="3" selected>3 x 2</option>
               <option value="4" >4 x 4</option>
               <option value="5">5 x 5</option>
             </select>
@@ -317,11 +317,12 @@
     }
 
     function generateCards() {
-      const gridSize = parseInt(document.getElementById('gridSize').value, 10);
-      const cardCount = parseInt(document.getElementById('cardCount').value, 10);
+      const cols = 3;
+      const rows = 2;
+     
       const freeCenter = document.getElementById('freeCenter').checked;
-
-      const total = gridSize * gridSize;
+      const total = cols * rows;
+      //const total = gridSize * gridSize;
       const needed = freeCenter ? total - 1 : total;
 
       if (items.length < needed) {
