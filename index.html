@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Body Parts Bingo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    header {
+      background: white;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 16px 40px;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    button, select, input {
+      font-size: 16px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #222;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .cards {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      page-break-after: always;
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .cell {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cell-img {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      background: white;
+    }
+
+    .cell-img img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .label {
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 8px 4px;
+      border-top: 1px solid #eee;
+      text-transform: uppercase;
+    }
+
+    .current-word {
+      font-size: 42px;
+      font-weight: bold;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .drawn-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .drawn-item {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .drawn-item img {
+      width: 100%;
+      height: 100px;
+      object-fit: contain;
+      background: white;
+    }
+
+    .small {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn.active {
+      background: #0066cc;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media print {
+      header, .controls, .tabs, #callerSection {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+      }
+
+      .panel, .card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Body Parts Bingo</h1>
+    <div class="small">Cartes à imprimer + application pour dicter les mots</div>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('cards')">Cartes</button>
+      <button class="tab-btn" onclick="showTab('caller')">Tirage / diction</button>
+    </div>
+
+    <section id="cardsSection">
+      <div class="panel">
+        <div class="controls">
+          <label>
+            Taille :
+            <select id="gridSize">
+              <option value="3">3 x 3</option>
+              <option value="4" selected>4 x 4</option>
+              <option value="5">5 x 5</option>
+            </select>
+          </label>
+
+          <label>
+            Nombre de cartes :
+            <input id="cardCount" type="number" min="1" max="30" value="6" />
+          </label>
+
+          <label>
+            <input id="freeCenter" type="checkbox" />
+            Case FREE au centre
+          </label>
+
+          <button onclick="generateCards()">Générer</button>
+          <button onclick="window.print()">Imprimer</button>
+        </div>
+      </div>
+
+      <div id="cardsContainer" class="cards"></div>
+    </section>
+
+    <section id="callerSection" class="hidden">
+      <div class="panel">
+        <div class="controls">
+          <button onclick="drawNext()">Piocher un mot</button>
+          <button onclick="repeatWord()">Répéter</button>
+          <button onclick="resetDraw()">Recommencer</button>
+        </div>
+
+        <div class="current-word" id="currentWord">—</div>
+        <div class="small">Déjà tirés : <span id="drawnCount">0</span> | Restants : <span id="remainingCount">0</span></div>
+
+        <div id="drawnList" class="drawn-list"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const items = [
+      { word: 'eye', image: 'images/eye.png' },
+      { word: 'ear', image: 'images/ear.png' },
+      { word: 'nose', image: 'images/nose.png' },
+      { word: 'mouth', image: 'images/mouth.png' },
+      { word: 'teeth', image: 'images/teeth.png' },
+      { word: 'head', image: 'images/head.png' },
+      { word: 'arm', image: 'images/arm.png' },
+      { word: 'leg', image: 'images/leg.png' },
+      { word: 'foot', image: 'images/foot.png' },
+      { word: 'knee', image: 'images/knee.png' },
+      { word: 'fingers', image: 'images/fingers.png' },
+      { word: 'hand', image: 'images/hand.png' },
+      { word: 'hair', image: 'images/hair.png' },
+      { word: 'shoulder', image: 'images/shoulder.png' },
+      { word: 'toe', image: 'images/toe.png' },
+      { word: 'neck', image: 'images/neck.png' },
+      { word: 'back', image: 'images/back.png' },
+      { word: 'stomach', image: 'images/stomach.png' },
+      { word: 'elbow', image: 'images/elbow.png' },
+      { word: 'face', image: 'images/face.png' }
+    ];
+
+    let drawPile = [];
+    let drawnItems = [];
+    let currentWord = '';
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function sample(array, count) {
+      return shuffle(array).slice(0, count);
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-GB';
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function showTab(tab) {
+      document.getElementById('cardsSection').classList.toggle('hidden', tab !== 'cards');
+      document.getElementById('callerSection').classList.toggle('hidden', tab !== 'caller');
+
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons[0].classList.toggle('active', tab === 'cards');
+      buttons[1].classList.toggle('active', tab === 'caller');
+    }
+
+    function createCell(item) {
+      if (!item) {
+        return `
+          <div class="cell">
+            <div class="cell-img" style="font-weight:bold;color:#888;">FREE</div>
+            <div class="label">FREE</div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="cell">
+          <div class="cell-img">
+            <img src="${item.image}" alt="${item.word}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;color:#888;font-size:12px;text-align:center;&quot;>Image manquante<br>${item.word}</div>';">
+          </div>
+          <div class="label">${item.word}</div>
+        </div>
+      `;
+    }
+
+    function generateCards() {
+      const gridSize = parseInt(document.getElementById('gridSize').value, 10);
+      const cardCount = parseInt(document.getElementById('cardCount').value, 10);
+      const freeCenter = document.getElementById('freeCenter').checked;
+
+      const total = gridSize * gridSize;
+      const needed = freeCenter ? total - 1 : total;
+
+      if (items.length < needed) {
+        alert("Pas assez d'images pour cette taille de grille.");
+        return;
+      }
+
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = '';
+
+      for (let c = 0; c < cardCount; c++) {
+        const selected = sample(items, needed);
+        let index = 0;
+        let html = `
+          <div class="card">
+            <div class="card-title">BINGO - Carte ${c + 1}</div>
+            <div class="grid" style="grid-template-columns: repeat(${gridSize}, 1fr);">
+        `;
+
+        for (let i = 0; i < total; i++) {
+          const isCenter = freeCenter && i === Math.floor(total / 2);
+          if (isCenter) {
+            html += createCell(null);
+          } else {
+            html += createCell(selected[index]);
+            index++;
+          }
+        }
+
+        html += `</div></div>`;
+        container.innerHTML += html;
+      }
+    }
+
+    function resetDraw() {
+      drawPile = shuffle(items);
+      drawnItems = [];
+      currentWord = '';
+      document.getElementById('currentWord').textContent = '—';
+      document.getElementById('drawnCount').textContent = '0';
+      document.getElementById('remainingCount').textContent = drawPile.length;
+      document.getElementById('drawnList').innerHTML = '';
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function drawNext() {
+      if (drawPile.length === 0) return;
+
+      const next = drawPile.shift();
+      drawnItems.push(next);
+      currentWord = next.word;
+
+      document.getElementById('currentWord').textContent = currentWord;
+      document.getElementById('drawnCount').textContent = drawnItems.length;
+      document.getElementById('remainingCount').textContent = drawPile.length;
+
+      const drawnList = document.getElementById('drawnList');
+      drawnList.innerHTML = drawnItems.map(item => `
+        <div class="drawn-item">
+          <img src="${item.image}" alt="${item.word}">
+          <div class="label">${item.word}</div>
+        </div>
+      `).join('');
+
+      speak(currentWord);
+    }
+
+    function repeatWord() {
+      if (currentWord) speak(currentWord);
+    }
+
+    generateCards();
+    resetDraw();
+  </script>
+</body>
+</html>
