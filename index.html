@@ -170,18 +170,30 @@
     }
 
     @media print {
-      header, .controls, .tabs, #callerSection {
-        display: none !important;
-      }
 
-      body {
-        background: white;
-      }
+  header, .controls, .tabs, #callerSection {
+    display: none !important;
+  }
 
-      .panel, .card {
-        box-shadow: none;
-      }
-    }
+  body {
+    background: white;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .card {
+    page-break-after: auto;
+    page-break-inside: avoid;
+    height: 48vh; /* 🔥 clé pour avoir 2 cartes par page */
+    box-shadow: none;
+    margin: 0;
+  }
+
+}
   </style>
 </head>
 <body>
