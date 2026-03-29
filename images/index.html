@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English body flashcards</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --border:#dbe4f0;
+      --blue:#2563eb;
+      --text:#1f2937;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+    }
+    .app{ width:min(100%, 520px); }
+    .panel{
+      background:var(--card);
+      border-radius:24px;
+      box-shadow:0 12px 30px rgba(0,0,0,.08);
+      padding:16px;
+    }
+    .top{
+      display:flex;
+      justify-content:center;
+      margin-bottom:12px;
+    }
+    .badge{
+      background:#eff6ff;
+      color:#1d4ed8;
+      padding:8px 14px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:1rem;
+    }
+    .card{
+      width:100%;
+      min-height:430px;
+      border:none;
+      border-radius:26px;
+      background:white;
+      border:3px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px;
+      cursor:pointer;
+    }
+    .card img{
+      max-width:100%;
+      max-height:390px;
+      object-fit:contain;
+      border-radius:20px;
+    }
+    .controls{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+    button.ctrl{
+      border:none;
+      border-radius:18px;
+      padding:14px 10px;
+      font-size:1.15rem;
+      font-weight:700;
+      cursor:pointer;
+      background:#eef2ff;
+      color:#1e3a8a;
+    }
+    button.primary{
+      background:var(--blue);
+      color:white;
+    }
+    .tiny{
+      text-align:center;
+      font-size:.92rem;
+      color:#6b7280;
+      margin-top:12px;
+    }
+    @media (max-width:420px){
+      .card{min-height:360px}
+      .card img{max-height:320px}
+      .controls{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel">
+      <div class="top">
+        <div class="badge"><span id="index">1</span> / <span id="total">11</span></div>
+      </div>
+
+      <button class="card" onclick="speakCurrent()" aria-label="écouter">
+        <img id="photo" src="head.png" alt="flashcard">
+      </button>
+
+      <div class="controls">
+        <button class="ctrl" onclick="prevCard()">⬅️</button>
+        <button class="ctrl primary" onclick="speakCurrent()">🔊</button>
+        <button class="ctrl" onclick="nextCard()">➡️</button>
+      </div>
+
+      <div class="tiny">Touchez l'image pour écouter.</div>
+    </div>
+  </div>
+
+  <script>
+    const cards = [
+      { word: "ear", image: "ear.png" },
+      { word: "foot", image: "foot.png" },
+      { word: "hair", image: "hair.png" },
+      { word: "hand", image: "hand.png" },
+      { word: "head", image: "head.png" },
+      { word: "leg", image: "leg.png" },
+      { word: "mouth", image: "mouth.png" },
+      { word: "neck", image: "neck.png" },
+      { word: "nose", image: "nose.png" },
+      { word: "teeth", image: "teeth.png" },
+      { word: "tongue", image: "tongue.png" }
+    ];
+
+    let current = 0;
+
+    function renderCard() {
+      document.getElementById("photo").src = cards[current].image;
+      document.getElementById("index").textContent = current + 1;
+      document.getElementById("total").textContent = cards.length;
+    }
+
+    function speakCurrent() {
+      const utter = new SpeechSynthesisUtterance(cards[current].word);
+      utter.lang = "en-GB";
+      utter.rate = 0.9;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    }
+
+    function nextCard() {
+      current = (current + 1) % cards.length;
+      renderCard();
+      speakCurrent();
+    }
+
+    function prevCard() {
+      current = (current - 1 + cards.length) % cards.length;
+      renderCard();
+      speakCurrent();
+    }
+
+    renderCard();
+  </script>
+</body>
+</html>
