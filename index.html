@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Body Parts Bingo</title>
+  <title>Bingo body parts</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,9 +16,6 @@
       background: white;
       padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
 
     h1 {
@@ -47,7 +44,7 @@
       align-items: center;
     }
 
-    button, select, input {
+    button, input {
       font-size: 16px;
       padding: 10px 12px;
       border-radius: 10px;
@@ -62,7 +59,7 @@
     }
 
     button:hover {
-      opacity: 0.9;
+      opacity: 0.92;
     }
 
     .cards {
@@ -86,7 +83,8 @@
 
     .grid {
       display: grid;
-      gap: 8px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
 
     .cell {
@@ -94,7 +92,7 @@
       border: 1px solid #ddd;
       border-radius: 12px;
       overflow: hidden;
-      aspect-ratio: 1 / 1;
+      min-height: 170px;
       display: flex;
       flex-direction: column;
     }
@@ -110,7 +108,7 @@
 
     .cell-img img {
       max-width: 100%;
-      max-height: 100%;
+      max-height: 120px;
       object-fit: contain;
     }
 
@@ -189,7 +187,7 @@
 <body>
   <header>
     <h1>Body Parts Bingo</h1>
-    <div class="small">Cartes à imprimer + application pour dicter les mots</div>
+    <div class="small">Cartes de 6 cases (3 colonnes × 2 lignes) + tirage des mots</div>
   </header>
 
   <div class="container">
@@ -202,22 +200,8 @@
       <div class="panel">
         <div class="controls">
           <label>
-            Taille :
-            <select id="gridSize">
-              <option value="3" selected>3 x 2</option>
-              <option value="4" >4 x 4</option>
-              <option value="5">5 x 5</option>
-            </select>
-          </label>
-
-          <label>
             Nombre de cartes :
             <input id="cardCount" type="number" min="1" max="30" value="6" />
-          </label>
-
-          <label>
-            <input id="freeCenter" type="checkbox" />
-            Case FREE au centre
           </label>
 
           <button onclick="generateCards()">Générer</button>
@@ -237,7 +221,10 @@
         </div>
 
         <div class="current-word" id="currentWord">—</div>
-        <div class="small">Déjà tirés : <span id="drawnCount">0</span> | Restants : <span id="remainingCount">0</span></div>
+        <div class="small">
+          Déjà tirés : <span id="drawnCount">0</span> |
+          Restants : <span id="remainingCount">0</span>
+        </div>
 
         <div id="drawnList" class="drawn-list"></div>
       </div>
@@ -260,6 +247,10 @@
       { word: 'neck', image: 'images/neck.png' },
       { word: 'tongue', image: 'images/tongue.png' },
     ];
+
+    const COLS = 3;
+    const ROWS = 2;
+    const TOTAL_CELLS = COLS * ROWS;
 
     let drawPile = [];
     let drawnItems = [];
@@ -297,19 +288,14 @@
     }
 
     function createCell(item) {
-      if (!item) {
-        return `
-          <div class="cell">
-            <div class="cell-img" style="font-weight:bold;color:#888;">FREE</div>
-            <div class="label">FREE</div>
-          </div>
-        `;
-      }
-
       return `
         <div class="cell">
           <div class="cell-img">
-            <img src="${item.image}" alt="${item.word}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;color:#888;font-size:12px;text-align:center;&quot;>Image manquante<br>${item.word}</div>';">
+            <img
+              src="${item.image}"
+              alt="${item.word}"
+              onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;color:#888;font-size:12px;text-align:center;&quot;>Image manquante<br>${item.word}</div>';"
+            >
           </div>
           <div class="label">${item.word}</div>
         </div>
@@ -317,16 +303,10 @@
     }
 
     function generateCards() {
-      const gridSize = 3;
-      const rows = 2;
-     
-      const freeCenter = document.getElementById('freeCenter').checked;
-      const total = gridSize * rows;
-      //const total = gridSize * gridSize;
-      const needed = freeCenter ? total - 1 : total;
+      const cardCount = parseInt(document.getElementById('cardCount').value, 10) || 1;
 
-      if (items.length < needed) {
-        alert("Pas assez d'images pour cette taille de grille.");
+      if (items.length < TOTAL_CELLS) {
+        alert("Pas assez d'images pour créer une carte de 6 cases.");
         return;
       }
 
@@ -334,25 +314,23 @@
       container.innerHTML = '';
 
       for (let c = 0; c < cardCount; c++) {
-        const selected = sample(items, needed);
-        let index = 0;
+        const selected = sample(items, TOTAL_CELLS);
+
         let html = `
           <div class="card">
             <div class="card-title">BINGO - Carte ${c + 1}</div>
-            <div class="grid" style="grid-template-columns: repeat(${gridSize}, 1fr);">
+            <div class="grid">
         `;
 
-        for (let i = 0; i < total; i++) {
-          const isCenter = freeCenter && i === Math.floor(total / 2);
-          if (isCenter) {
-            html += createCell(null);
-          } else {
-            html += createCell(selected[index]);
-            index++;
-          }
+        for (const item of selected) {
+          html += createCell(item);
         }
 
-        html += `</div></div>`;
+        html += `
+            </div>
+          </div>
+        `;
+
         container.innerHTML += html;
       }
     }
@@ -361,10 +339,12 @@
       drawPile = shuffle(items);
       drawnItems = [];
       currentWord = '';
+
       document.getElementById('currentWord').textContent = '—';
       document.getElementById('drawnCount').textContent = '0';
       document.getElementById('remainingCount').textContent = drawPile.length;
       document.getElementById('drawnList').innerHTML = '';
+
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
@@ -393,7 +373,9 @@
     }
 
     function repeatWord() {
-      if (currentWord) speak(currentWord);
+      if (currentWord) {
+        speak(currentWord);
+      }
     }
 
     generateCards();
