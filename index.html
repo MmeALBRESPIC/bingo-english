@@ -228,12 +228,15 @@
       <div class="panel">
         <div class="controls">
           <button onclick="drawNext()">Piocher un mot</button>
-          <button onclick="toggleDisplay()">Afficher / cacher</button>
+          <button onclick="toggleImage()">Afficher / cacher image</button>
           <button onclick="repeatWord()">Répéter</button>
           <button onclick="resetDraw()">Recommencer</button>
         </div>
 
         <div id="currentWord" style="display:none;"></div>
+        <div id="revealImage" style="display:none; text-align:center; margin-top:15px;">
+          <img id="revealImg" style="max-height:150px;">
+        </div>
         <div class="small">
           Déjà tirés : <span id="drawnCount">0</span> |
           Restants : <span id="remainingCount">0</span>
@@ -268,12 +271,10 @@
     let drawPile = [];
     let drawnItems = [];
     let currentWord = '';
-    let displayVisible = false;
+    let currentItem = null;
+    let imageVisible = false;
     
-    function toggleDisplay() {
-      displayVisible = !displayVisible;
-      document.getElementById('currentWord').style.display = displayVisible ? 'block' : 'none';
-    }
+  
     function shuffle(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -370,21 +371,36 @@
 
     function drawNext() {
       if (drawPile.length === 0) return;
-
+    
       const next = drawPile.shift();
       drawnItems.push(next);
       currentWord = next.word;
-
-      document.getElementById('currentWord').textContent = currentWord;
+      currentItem = next;
+    
       document.getElementById('drawnCount').textContent = drawnItems.length;
       document.getElementById('remainingCount').textContent = drawPile.length;
-
-      const drawnList = document.getElementById('drawnList');
-      drawnList.innerHTML = '';
-
+    
+      // 🔥 on cache l'image à chaque nouveau mot
+      document.getElementById('revealImage').style.display = 'none';
+      imageVisible = false;
+    
       speak(currentWord);
     }
-
+    function toggleImage() {
+      if (!currentItem) return;
+    
+      imageVisible = !imageVisible;
+    
+      const container = document.getElementById('revealImage');
+      const img = document.getElementById('revealImg');
+    
+      if (imageVisible) {
+        img.src = currentItem.image;
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
     function repeatWord() {
       if (currentWord) {
         speak(currentWord);
