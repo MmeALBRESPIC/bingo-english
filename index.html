@@ -228,11 +228,12 @@
       <div class="panel">
         <div class="controls">
           <button onclick="drawNext()">Piocher un mot</button>
+          <button onclick="toggleDisplay()">Afficher / cacher</button>
           <button onclick="repeatWord()">Répéter</button>
           <button onclick="resetDraw()">Recommencer</button>
         </div>
 
-        <div class="current-word" id="currentWord">—</div>
+        <div id="currentWord" style="display:none;"></div>
         <div class="small">
           Déjà tirés : <span id="drawnCount">0</span> |
           Restants : <span id="remainingCount">0</span>
@@ -267,7 +268,12 @@
     let drawPile = [];
     let drawnItems = [];
     let currentWord = '';
-
+    let displayVisible = false;
+    
+    function toggleDisplay() {
+      displayVisible = !displayVisible;
+      document.getElementById('currentWord').style.display = displayVisible ? 'block' : 'none';
+    }
     function shuffle(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -374,11 +380,7 @@
       document.getElementById('remainingCount').textContent = drawPile.length;
 
       const drawnList = document.getElementById('drawnList');
-      drawnList.innerHTML = drawnItems.map(item => `
-        <div class="drawn-item">
-          <img src="${item.image}" alt="${item.word}">
-        </div>
-      `).join('');
+      drawnList.innerHTML = '';
 
       speak(currentWord);
     }
